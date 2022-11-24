@@ -1,0 +1,6 @@
+{
+    "token": "token",
+    "ClientID": "botid",
+    "url":"mongodb://localhost/thealoq",
+    "footer": "Developer 🍿 Thealoq"
+}
