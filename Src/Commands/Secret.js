@@ -105,6 +105,7 @@ class Commands {
             const func = obj[b.values];
             if (typeof func === "function") func(ctx, embed, RoomCreate,Secret);
           }
+          collector.stop()
         })
   }
 }
@@ -119,10 +120,12 @@ async function ChangeName ( ctx, embed , RoomCreate, Secret) {
   ctx.editReply({ embeds: [embed.setDescription("Lütfen Bir İsim Belirleyin")], components: [ ] })
 const collector = ctx.channel.createMessageCollector({ time: 15000, limit: 1 });
   collector.on('collect', m => {
-	client.channels.fetch(Secret.ChannelID)
+ if(m.author.id == ctx.member.id) {
+  client.channels.fetch(Secret.ChannelID)
   .then(channel => channel.setName(`${m}`))
   .catch(console.error);
 ctx.editReply({ embeds: [embed.setDescription(`Başariyla Kanalın <#${Secret.ChannelID}> \`${m}\`  ismi Ayarlandi`)] })
+ }
 });
 }
 
@@ -130,12 +133,14 @@ async function ChangeVoiceLimit ( ctx, embed , RoomCreate, Secret) {
   if(!Secret) return ctx.channel.send({ embeds: [embed.setDescription("Dostum bi kanala sahip değilsin")] })
   ctx.editReply({  embeds: [embed.setDescription("Lütfen limit için bir sayi yazin")] })
   const collector = ctx.channel.createMessageCollector({ time: 15000, limit: 1 });
+  if(m.author.id == ctx.member.id) {
   collector.on('collect', m => {
 	client.channels.fetch(Secret.ChannelID)
   .then(channel => channel.setUserLimit(parseInt(m.content)))
   .catch(console.error);
 ctx.editReply({ embeds: [embed.setDescription(`Başariyla Kanalın <#${Secret.ChannelID}> Limit Sayısı \`${m}\` Olarak Ayarlandi`)] })
 });
+}
 }
 
 async function LockVoiceChannel ( ctx, embed , RoomCreate, Secret,  ) {
@@ -162,7 +167,9 @@ async function UnLockVoiceChannel ( ctx, embed , RoomCreate, Secret,  ) {
 async function DeleteVoiceChannel ( ctx, embed , RoomCreate, Secret,  ) {
   if(!Secret) return ctx.editReply({ embeds: [embed.setDescription("Dostum bi kanala sahip değilsin")] })
   client.channels.fetch(Secret.ChannelID)
-  .then(channel => channel.delete())
+  .then(channel => {
+    channel.delete()
+  })
   .catch(console.error);
   SecretDb.findOneAndRemove({ GuildID: ctx.guild.id, Member: ctx.member.id }).catch(e => { console.error({}) })
   ctx.editReply({ embeds: [embed.setDescription(`Başariyla Kanalın Silindi`)] })
